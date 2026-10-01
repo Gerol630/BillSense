@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>BillSense – The Smartest Way to Pay Your Bills</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 10px 30px;
+      background: #121212;
+      color: #f5f5f5;
+    }
+    header {
+      text-align: center;
+      padding: 20px 10px;
+      background: #000000;
+      color: #ffffff;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #222;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    header p {
+      margin: 6px 0;
+      font-size: 1rem;
+      color: #00bcd4;
+    }
+    .hero {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .hero h2 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      color: #00bcd4;
+    }
+    .hero p {
+      font-size: 0.95rem;
+      max-width: 600px;
+      margin: 0 auto 10px;
+      color: #cccccc;
+    }
+    .cta-buttons {
+      margin-top: 10px;
+    }
+    .cta-buttons button {
+      margin: 5px;
+      padding: 8px 14px;
+      font-size: 0.95rem;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .primary-btn {
+      background: #00bcd4;
+      color: #000;
+    }
+    .primary-btn:hover {
+      background: #26c6da;
+    }
+    .secondary-btn {
+      background: #1e1e1e;
+      color: #f5f5f5;
+      border: 1px solid #333;
+    }
+    .secondary-btn:hover {
+      background: #2a2a2a;
+    }
+    .section {
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 12px;
+      margin-top: 15px;
+      background: #1a1a1a;
+    }
+    .section h3 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      color: #00bcd4;
+    }
+    label {
+      display: block;
+      margin-top: 8px;
+      font-size: 0.9rem;
+    }
+    input {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+      box-sizing: border-box;
+      border-radius: 3px;
+      border: 1px solid #333;
+      background: #1e1e1e;
+      color: #f5f5f5;
+    }
+    button {
+      margin-top: 8px;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      border-radius: 3px;
+    }
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #444;
+      border-radius: 4px;
+      background: #181818;
+    }
+    .result h4 {
+      margin-top: 0;
+      color: #00bcd4;
+    }
+    .risk-bar-container {
+      margin-top: 8px;
+      height: 12px;
+      background: #333;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .risk-bar {
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .bill-block {
+      border: 1px solid #333;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      background: #1a1a1a;
+    }
+    .bill-header {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #00bcd4;
+    }
+    .small-text {
+      font-size: 0.85rem;
+      color: #bbbbbb;
+    }
+    @media (max-width: 480px) {
+      body { max-width: 100%; margin: 0; padding: 10px; }
+      .cta-buttons button { width: 100%; margin: 5px 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BillSense</h1>
+    <p>The smartest way to pay your bills — instantly, accurately, and for less.</p>
+  </header>
+
+  <div class="hero">
+    <h2>Stop guessing. Start saving.</h2>
+    <p>
+      BillSense analyzes your bills, cash, credit cards, due dates, and paychecks to find the cheapest way to pay —
+      before you get hit with late fees, overdraft charges, or unnecessary interest.
+    </p>
+    <div class="cta-buttons">
+      <button class="primary-btn" onclick="scrollToApp()">Start optimizing your bills</button>
+      <button class="secondary-btn" onclick="scrollToHow()">How BillSense works</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Smart Defaults</h3>
+    <p class="small-text">
+      Set your typical financial settings once. BillSense uses these to calculate realistic savings every time.
+    </p>
+    <label>Default credit card APR (% per year)
+      <input type="number" id="defaultApr" step="0.01" value="24">
+    </label>
+    <label>Default late fee ($)
+      <input type="number" id="defaultLateFee" step="0.01" value="35">
+    </label>
+    <label>Default overdraft fee ($)
+      <input type="number" id="defaultOverdraftFee" step="0.01" value="35">
+    </label>
+    <label>Default safety cash cushion ($)
+      <input type="number" id="defaultSafety" step="0.01" value="100">
+    </label>
+    <button class="secondary-btn" onclick="applyDefaults()">Apply defaults to new bills</button>
+  </div>
+
+  <div class="section" id="appSection">
+    <h3>Your Bills</h3>
+    <p class="small-text">
+      Add each bill you want BillSense to optimize. We’ll tell you the cheapest way to pay — today or later.
+    </p>
+    <div id="billsContainer"></div>
+    <button class="secondary-btn" onclick="addBill()">Add bill</button>
+    <button class="primary-btn" onclick="calculateAll()">Optimize all bills</button>
+  </div>
+
+  <div class="section result" id="overallResult" style="display:none;">
+    <h3>Usage & Revenue</h3>
+    <p id="usageCount">Total uses (this session): 0</p>
+    <p id="contractBalance">Contract balance: 0 MATIC</p>
+    <p id="revenueEstimate">Estimated revenue (this session): $0.00</p>
+    <p id="overallText" class="small-text"></p>
+    <button class="secondary-btn" id="withdrawRevenue">Withdraw revenue</button>
+    <button class="secondary-btn" onclick="copySummary()">Copy summary</button>
+  </div>
+
+  <div class="section" id="howSection">
+    <h3>How BillSense Works</h3>
+    <p class="small-text">
+      BillSense looks at your bill amount, due date, cash on hand, credit card grace period, interest rates,
+      minimum payments, and paycheck timing. Then it compares:
+    </p>
+    <ul class="small-text">
+      <li>Paying with cash today</li>
+      <li>Using your credit card within the grace period</li>
+      <li>Using your credit card with interest</li>
+      <li>Making a minimum payment now</li>
+      <li>Waiting until your paycheck</li>
+      <li>Paying late and taking the fee</li>
+    </ul>
+    <p class="small-text">
+      For each bill, BillSense chooses the option with the lowest real cost — including fees, interest, and cash‑flow impact.
+      You see your recommended method, date, total cost, savings vs doing nothing, risk score, and whether waiting is safer.
+    </p>
+  </div>
+
+  <!-- Blockchain + app logic -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.min.js"></script>
+  <script>
+    // ===== Branding helpers =====
+    function scrollToApp() {
+      document.getElementById('appSection').scrollIntoView({ behavior: 'smooth' });
+    }
+    function scrollToHow() {
+      document.getElementById('howSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ===== Contract config =====
+    const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS_HERE";
+    const CONTRACT_ABI = [ /* paste ABI JSON here */ ];
+    const PRICE_PER_USE_USD = 0.10;
+
+    let billCount = 0;
+    let defaults = {
+      apr: 24,
+      lateFee: 35,
+      overdraftFee: 35,
+      safety: 100
+    };
+    let localUsageCount = 0;
+
+    function applyDefaults() {
+      defaults.apr = parseFloat(document.getElementById('defaultApr').value || 24);
+      defaults.lateFee = parseFloat(document.getElementById('defaultLateFee').value || 35);
+      defaults.overdraftFee = parseFloat(document.getElementById('defaultOverdraftFee').value || 35);
+      defaults.safety = parseFloat(document.getElementById('defaultSafety').value || 100);
+      alert('Defaults updated. New bills will use these values.');
+    }
+
+    function addBill() {
+      billCount++;
+      const container = document.getElementById('billsContainer');
+
+      const div = document.createElement('div');
+      div.className = 'bill-block';
+      div.id = `bill-${billCount}`;
+
+      div.innerHTML = `
+        <div class="bill-header">Bill #${billCount}</div>
+        <label>Bill name
+          <input type="text" id="billName-${billCount}" placeholder="e.g. DTE, Rent, Water">
+        </label>
+        <label>Bill amount ($)
+          <input type="number" id="billAmount-${billCount}" step="0.01">
+        </label>
+        <label>Due date
+          <input type="date" id="dueDate-${billCount}">
+        </label>
+        <label>Cash on hand ($)
+          <input type="number" id="cashOnHand-${billCount}" step="0.01">
+        </label>
+        <label>Bank fee per payment ($)
+          <input type="number" id="bankFee-${billCount}" step="0.01" value="0">
+        </label>
+        <label>Credit card APR (% per year)
+          <input type="number" id="apr-${billCount}" step="0.01" value="${defaults.apr}">
+        </label>
+        <label>Credit card grace period end date
+          <input type="date" id="graceDate-${billCount}">
+        </label>
+        <label>Minimum payment ($)
+          <input type="number" id="minPayment-${billCount}" step="0.01" value="0">
+        </label>
+        <label>Late fee ($)
+          <input type="number" id="lateFee-${billCount}" step="0.01" value="${defaults.lateFee}">
+        </label>
+        <label>Next paycheck date
+          <input type="date" id="payDate-${billCount}">
+        </label>
+        <label>Safety cash cushion ($)
+          <input type="number" id="safetyThreshold-${billCount}" step="0.01" value="${defaults.safety}">
+        </label>
+        <button class="primary-btn" onclick="payAndOptimize(${billCount})">Pay & optimize this bill</button>
+
+        <div class="result" id="result-${billCount}" style="display:none;">
+          <h4>Recommendation</h4>
+          <p id="method-${billCount}"></p>
+          <p id="date-${billCount}"></p>
+          <p id="cost-${billCount}"></p>
+          <p id="savings-${billCount}"></p>
+          <p id="risk-${billCount}"></p>
+          <div class="risk-bar-container">
+            <div class="risk-bar" id="riskBar-${billCount}"></div>
+          </div>
+          <p id="cashflow-${billCount}"></p>
+          <p id="wait-${billCount}"></p>
+          <p id="explanation-${billCount}"></p>
+        </div>
+      `;
+
+      container.appendChild(div);
+    }
+
+    function daysBetween(d1, d2) {
+      const msPerDay = 1000 * 60 * 60 * 24;
+      return Math.round((d2 - d1) / msPerDay);
+    }
+
+    async function payAndOptimize(id) {
+      if (!window.ethereum) {
+        alert("Please install MetaMask or a compatible wallet to use BillSense.");
+        return;
+      }
+
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+        const price = await contract.pricePerUse();
+        const tx = await contract.payForUse({ value: price });
+        await tx.wait();
+
+        localUsageCount++;
+        document.getElementById('usageCount').textContent =
+          `Total uses (this session): ${localUsageCount}`;
+        updateRevenueEstimate();
+        await updateContractBalance();
+
+        calculateBestOption(id);
+      } catch (e) {
+        console.error(e);
+        alert("Payment failed or was cancelled.");
+      }
+    }
+
+    function calculateBestOption(id) {
+      const today = new Date();
+
+      const name = document.getElementById(`billName-${id}`).value || `Bill #${id}`;
+      const B = parseFloat(document.getElementById(`billAmount-${id}`).value || 0);
+      const D_due = new Date(document.getElementById(`dueDate-${id}`).value);
+      const C = parseFloat(document.getElementById(`cashOnHand-${id}`).value || 0);
+      const F_bank = parseFloat(document.getElementById(`bankFee-${id}`).value || 0);
+      const aprInput = parseFloat(document.getElementById(`apr-${id}`).value || defaults.apr);
+      const apr = aprInput / 100;
+      const D_grace = new Date(document.getElementById(`graceDate-${id}`).value);
+      const M_min = parseFloat(document.getElementById(`minPayment-${id}`).value || 0);
+      const F_late = parseFloat(document.getElementById(`lateFee-${id}`).value || defaults.lateFee);
+      const D_pay = new Date(document.getElementById(`payDate-${id}`).value);
+      const S = parseFloat(document.getElementById(`safetyThreshold-${id}`).value || defaults.safety);
+      const F_overdraft = defaults.overdraftFee;
+
+      const resultDiv = document.getElementById(`result-${id}`);
+      const methodP = document.getElementById(`method-${id}`);
+      const dateP = document.getElementById(`date-${id}`);
+      const costP = document.getElementById(`cost-${id}`);
+      const savingsP = document.getElementById(`savings-${id}`);
+      const riskP = document.getElementById(`risk-${id}`);
+      const riskBar = document.getElementById(`riskBar-${id}`);
+      const cashflowP = document.getElementById(`cashflow-${id}`);
+      const waitP = document.getElementById(`wait-${id}`);
+      const explanationP = document.getElementById(`explanation-${id}`);
+
+      if (!B || isNaN(D_due)) {
+        alert(`Please enter at least bill amount and due date for ${name}.`);
+        return;
+      }
+
+      let costCashToday = F_bank;
+      const cashAfterPay = C - B;
+      if (cashAfterPay < 0) {
+        costCashToday += F_overdraft;
+      }
+
+      const costLate = F_bank + F_late;
+
+      let costCCGrace = Infinity;
+      let costCCInterest = Infinity;
+
+      if (!isNaN(D_grace.getTime())) {
+        if (today <= D_grace) {
+          costCCGrace = 0;
+        } else {
+          const daysInterest = 30;
+          const dailyRate = apr / 365;
+          costCCInterest = B * dailyRate * daysInterest;
+        }
+      }
+
+      const cashSafe = cashAfterPay >= S;
+
+      const options = [];
+
+      if (C >= B || cashAfterPay >= 0) {
+        options.push({
+          name: 'Pay with cash today',
+          date: today,
+          cost: costCashToday,
+          explanation: cashSafe
+            ? 'You can pay in cash today and still keep your safety cushion.'
+            : 'Paying in cash today will leave you below your safety cushion or trigger overdraft.'
+        });
+      }
+
+      if (costCCGrace === 0) {
+        options.push({
+          name: 'Pay with credit card within grace period',
+          date: today,
+          cost: 0,
+          explanation: 'Using your credit card within the grace period avoids interest and late fees.'
+        });
+      }
+
+      if (costCCInterest !== Infinity) {
+        options.push({
+          name: 'Pay with credit card (interest applies)',
+          date: today,
+          cost: costCCInterest,
+          explanation: 'You will pay interest for about one statement cycle, but this may still be cheaper than a late fee or overdraft.'
+        });
+      }
+
+      const daysToDue = daysBetween(today, D_due);
+      if (daysToDue < 0) {
+        options.push({
+          name: 'Pay late (after due date)',
+          date: D_due,
+          cost: costLate,
+          explanation: 'Paying after the due date will incur a late fee.'
+        });
+      }
+
+      if (M_min > 0 && C >= M_min) {
+        options.push({
+          name: 'Make minimum payment now, pay rest later',
+          date: today,
+          cost: F_bank,
+          explanation: 'Minimum payment now may avoid late fees and interest until you can pay the rest.'
+        });
+      }
+
+      if (options.length === 0) {
+        methodP.textContent = 'No viable payment options found.';
+        resultDiv.style.display = 'block';
+        return;
+      }
+
+      options.sort((a, b) => a.cost - b.cost);
+      const best = options[0];
+
+      const costNothing = costLate;
+      const savings = costNothing - best.cost;
+
+      let lateRisk = 10;
+      if (daysToDue < 0) lateRisk = 100;
+      else if (daysToDue <= 2) lateRisk = 80;
+      else if (daysToDue <= 7) lateRisk = 50;
+
+      let interestRisk = costCCInterest > 0 ? Math.min(100, apr * 100) : 0;
+      let cashRisk = cashSafe ? 10 : 90;
+
+      const riskScore = Math.round((lateRisk + interestRisk + cashRisk) / 3);
+
+      let waitText = '';
+      if (!isNaN(D_pay.getTime())) {
+        const stillBeforeDue = D_pay <= D_due;
+        if (stillBeforeDue && C < B) {
+          waitText = `Waiting until your paycheck on ${D_pay.toDateString()} may let you pay without overdraft or credit, if income is enough.`;
+        } else if (!stillBeforeDue) {
+          waitText = `Waiting until your paycheck risks a late fee because it is after the due date.`;
+        } else {
+          waitText = `Paying now is safer than waiting for your paycheck based on current inputs.`;
+        }
+      }
+
+      methodP.textContent = `Bill: ${name} — Method: ${best.name}`;
+      dateP.textContent = `Recommended date: ${best.date.toDateString()}`;
+      costP.textContent = `Estimated total cost: $${best.cost.toFixed(2)}`;
+      savingsP.textContent = `Savings vs doing nothing: $${savings.toFixed(2)}`;
+      riskP.textContent = `Risk score: ${riskScore}/100`;
+      cashflowP.textContent = `Cash-flow impact: You will have $${cashAfterPay.toFixed(2)} left after paying today.`;
+      waitP.textContent = `Should you wait? ${waitText || 'No paycheck info provided.'}`;
+      explanationP.textContent = best.explanation;
+
+      riskBar.style.width = `${riskScore}%`;
+      if (riskScore <= 33) {
+        riskBar.style.background = '#4caf50';
+      } else if (riskScore <= 66) {
+        riskBar.style.background = '#ffeb3b';
+      } else {
+        riskBar.style.background = '#f44336';
+      }
+
+      resultDiv.style.display = 'block';
+      document.getElementById('overallResult').style.display = 'block';
+    }
+
+    async function updateContractBalance() {
+      try {
+        if (!window.ethereum) return;
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+        const balanceWei = await contract.getBalance();
+        const balanceMatic = Number(ethers.formatEther(balanceWei));
+        document.getElementById('contractBalance').textContent =
+          `Contract balance: ${balanceMatic.toFixed(6)} MATIC`;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function updateRevenueEstimate() {
+      const uses = localUsageCount;
+      const revenue = uses * PRICE_PER_USE_USD;
+      document.getElementById('revenueEstimate').textContent =
+        `Estimated revenue (this session): $${revenue.toFixed(2)}`;
+    }
+
+    async function calculateAll() {
+      let summary = '';
+      for (let i = 1; i <= billCount; i++) {
+        const resultDiv = document.getElementById(`result-${i}`);
+        if (resultDiv && resultDiv.style.display === 'block') {
+          const method = document.getElementById(`method-${i}`).textContent;
+          const date = document.getElementById(`date-${i}`).textContent;
+          const cost = document.getElementById(`cost-${i}`).textContent;
+          const savings = document.getElementById(`savings-${i}`).textContent;
+          const risk = document.getElementById(`risk-${i}`).textContent;
+          const cashflow = document.getElementById(`cashflow-${i}`).textContent;
+          const wait = document.getElementById(`wait-${i}`).textContent;
+
+          summary += `${method}\n${date}\n${cost}\n${savings}\n${risk}\n${cashflow}\n${wait}\n\n`;
+        }
+      }
+
+      const overallText = document.getElementById('overallText');
+
+      if (summary.trim() === '') {
+        overallText.textContent = 'No optimized bills yet. Optimize at least one bill to see your summary.';
+      } else {
+        overallText.textContent = summary;
+      }
+
+      document.getElementById('overallResult').style.display = 'block';
+    }
+
+    async function withdrawRevenue() {
+      if (!window.ethereum) {
+        alert("Please install MetaMask or a compatible wallet.");
+        return;
+      }
+
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+        const tx = await contract.withdraw();
+        await tx.wait();
+
+        alert("Revenue withdrawn to your wallet.");
+        await updateContractBalance();
+      } catch (e) {
+        console.error(e);
+        alert("Withdraw failed or was cancelled.");
+      }
+    }
+
+    function copySummary() {
+      const text = document.getElementById('overallText').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Summary copied to clipboard.');
+      }).catch(() => {
+        alert('Unable to copy summary.');
+      });
+    }
+
+    document.getElementById('withdrawRevenue').onclick = withdrawRevenue;
+
+    // Start with one bill by default
+    addBill();
+    updateContractBalance();
+  </script>
+</body>
+</html>
